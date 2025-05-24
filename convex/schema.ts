@@ -10,6 +10,9 @@ export default defineSchema({
   numbers: defineTable({
     value: v.number(),
   }),
+  waitlist: defineTable({
+    email: v.string(),
+  }),
   forms: defineTable({
     createdBy: v.string(),
     defaultRequired: v.optional(v.boolean()),
@@ -36,10 +39,14 @@ export default defineSchema({
     name: v.string(),
     order: v.float64(),
     required: v.optional(v.boolean()),
-    selectOptions: v.optional(v.array(v.object({
-      name: v.string(),
-      order: v.float64(),
-    }))),
+    selectOptions: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          order: v.float64(),
+        }),
+      ),
+    ),
     type: v.union(
       v.literal("text"),
       v.literal("textarea"),

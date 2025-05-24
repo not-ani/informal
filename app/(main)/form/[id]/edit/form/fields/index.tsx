@@ -5,7 +5,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { PlusIcon } from "lucide-react";
-import { FieldType } from "@/lib/utils";
+import { autoCompleteSchema, FieldType } from "@/lib/utils";
 import { FieldCard } from "./fieldCard";
 import {
   DndContext,
@@ -22,11 +22,16 @@ import {
   sortableKeyboardCoordinates,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { experimental_useObject as useObject } from "@ai-sdk/react";
 
 export function FormFields({ id, defaultRequired }: { id: string, defaultRequired: boolean }) {
   const [selectedItem, setSelectedItem] = useState<Id<"form_fields"> | null>(
     null,
   );
+  const { object, submit, isLoading } = useObject({
+    api: '/api/complete',
+    schema: autoCompleteSchema,
+  });
   const formFields = useQuery(api.form_fields.getFormFields, { formId: id });
   const deleteField = useMutation(api.form_fields.deleteField);
   const updateField = useMutation(api.form_fields.updateField)
@@ -70,6 +75,7 @@ export function FormFields({ id, defaultRequired }: { id: string, defaultRequire
     deleteField({ fieldId });
     if (selectedItem === fieldId) {
       setSelectedItem(null);
+      setEditingFieldName(null);
     }
   }
 
@@ -83,22 +89,36 @@ export function FormFields({ id, defaultRequired }: { id: string, defaultRequire
     });
     if (newFieldId) {
       setSelectedItem(newFieldId);
-      const newField = formFields?.find(f => f._id === newFieldId);
-      if (newField) {
-        setEditingFieldName(newField.name);
-      }
+      // Reset editing field name to the initial value for new fields
+      setEditingFieldName("New Field");
     }
   }
 
   function handleFieldNameChange(newName: string) {
     if (selectedItem && editingFieldName !== null) {
       updateField({ fieldId: selectedItem, name: newName, formId: id as Id<"forms"> });
+      submit({
+        formId: id,
+        fieldId: selectedItem,
+        content: newName
+      });
+      if (object && object.type) {
+        handleTypeChange(object.type);
+      }
     }
   }
 
   function handleSaveFieldName() {
     if (selectedItem && editingFieldName !== null) {
         handleFieldNameChange(editingFieldName);
+        submit({
+          formId: id,
+          fieldId: selectedItem,
+          content: editingFieldName
+        });
+        if (object && object.type) {
+          handleTypeChange(object.type);
+        }
     }
   }
 

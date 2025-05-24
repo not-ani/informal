@@ -15,5 +15,9 @@ export const New = () => {
     return;
   };
 
-  return <Button onClick={handleCreateClick}>Create Form</Button>;
+  return (
+    <Button className="bg-primary" onClick={handleCreateClick}>
+      Create Form
+    </Button>
+  );
 };

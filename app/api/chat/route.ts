@@ -5,13 +5,18 @@ import z from "zod";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 
 export const maxDuration = 30;
 
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
 export async function POST(req: Request) {
   const { messages, formId } = await req.json();
 
+  const token = await convexAuthNextjsToken();
+
+  if (!token) {
+    return new Response("Unauthorized", { status: 401 });
+  }
 
   const result = streamText({
     model: google("gemini-2.0-flash"),
@@ -51,7 +56,7 @@ export async function POST(req: Request) {
           const formInfo = await fetchQuery(api.forms.getFormContext, {
             formId: form,
           }, {
-            token: await convexAuthNextjsToken(),
+            token,
           });
           return formInfo;
         },
@@ -89,7 +94,7 @@ export async function POST(req: Request) {
             required,
             selectOptions,
           }, {
-            token: await convexAuthNextjsToken(),
+            token,
           });
           return "Field created successfully";
         },
@@ -135,7 +140,7 @@ export async function POST(req: Request) {
             required,
             selectOptions,
           }, {
-            token: await convexAuthNextjsToken(),
+            token,
           });
           return "Field updated successfully";
         },
@@ -150,7 +155,7 @@ export async function POST(req: Request) {
           await fetchMutation(api.form_fields.deleteField, {
             fieldId: fId,
           }, {
-            token: await convexAuthNextjsToken(),
+            token,
           });
           return "Field deleted successfully";
         },
@@ -165,7 +170,7 @@ export async function POST(req: Request) {
           await fetchMutation(api.forms.deleteForm, {
             formId: form,
           }, {
-            token: await convexAuthNextjsToken(),
+            token,
           });
           return "Form deleted successfully";
         },

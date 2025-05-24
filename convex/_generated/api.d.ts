@@ -19,6 +19,7 @@ import type * as form_responses from "../form_responses.js";
 import type * as forms from "../forms.js";
 import type * as http from "../http.js";
 import type * as myFunctions from "../myFunctions.js";
+import type * as waitlist from "../waitlist.js";
 
 /**
  * A utility for referencing Convex functions in your app's API.
@@ -35,6 +36,7 @@ declare const fullApi: ApiFromModules<{
   forms: typeof forms;
   http: typeof http;
   myFunctions: typeof myFunctions;
+  waitlist: typeof waitlist;
 }>;
 export declare const api: FilterApi<
   typeof fullApi,
