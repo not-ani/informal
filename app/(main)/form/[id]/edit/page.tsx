@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/resizable";
 import { useParams } from "next/navigation";
 import { Chat } from "./chat";
-import { ScrollArea } from "@/components/ui/scroll-area";
 export default function Page() {
   const { id } = useParams<{ id: string }>();
 
@@ -21,7 +20,7 @@ export default function Page() {
           maxSize={75}
           className="bg-muted flex flex-col gap-10 h-screen pt-10 items-center lg:min-w-2/3 overflow-y-auto h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent "
         >
-              <Form id={id} />
+          <Form id={id} />
         </ResizablePanel>
         <ResizableHandle />
         <ResizablePanel>

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
 
 import type { Attachment, UIMessage } from "ai";
@@ -215,10 +213,10 @@ function PureMultimodalInput({
         value={input}
         onChange={handleInput}
         className={cn(
-          "bg-muted max-h-[calc(75dvh)] min-h-[24px] resize-none overflow-hidden rounded-2xl pb-10 !text-base dark:border-zinc-700",
+          "bg-muted max-h-[calc(75dvh)] min-h-[24px] resize-none overflow-hidden rounded-2xl pb-8 !text-base dark:border-zinc-700",
           className,
         )}
-        rows={2}
+        rows={1}
         autoFocus
         onKeyDown={(event) => {
           if (

@@ -1,7 +1,7 @@
 "use client";
 import { useChat } from "@ai-sdk/react";
 import { Attachment } from "ai";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./input";
@@ -33,6 +33,25 @@ export function Chat({
   });
 
   const [attachments, setAttachments] = useState<Array<Attachment>>([]);
+
+  // Prefill the chat input with the prompt stored in sessionStorage for this form
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+
+    try {
+      const storedPrompt = sessionStorage.getItem(`newFormPrompt-${formId}`);
+      if (storedPrompt) {
+        // Remove it immediately so it's not reused unintentionally
+        sessionStorage.removeItem(`newFormPrompt-${formId}`);
+
+        // Send it as the very first user message
+        append({ role: "user", content: storedPrompt });
+      }
+    } catch {
+      /* ignore */
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formId, append]);
 
   return (
     <div className="w-full h-full flex flex-col gap-4 ">
