@@ -1,4 +1,4 @@
-import { FileText, Plus, Crown, User } from "lucide-react";
+import { Plus, Crown, User } from "lucide-react";
 import React from "react";
 import { Button } from "./ui/button";
 
