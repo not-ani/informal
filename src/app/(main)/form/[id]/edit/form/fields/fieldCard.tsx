@@ -7,7 +7,7 @@ import { FieldContent, ChoiceFieldContent } from "./fieldContent";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { FunctionReturnType } from "convex/server";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 type Field = FunctionReturnType<typeof api.form_fields.getFormFields>[number];
 
 export function FieldCard({

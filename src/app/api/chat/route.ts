@@ -3,8 +3,8 @@ import { FieldType, fieldTypeSchema } from "@/lib/utils";
 import { google } from "@ai-sdk/google";
 import z from "zod";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { api } from "@convex/_generated/api";
+import { Id } from "@convex/_generated/dataModel";
 import { getAuthToken } from "@/lib/auth";
 
 export const maxDuration = 30;

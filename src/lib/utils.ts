@@ -1,5 +1,5 @@
 import { clsx, type ClassValue } from "clsx";
-import { api } from "../convex/_generated/api";
+import { api } from "../../convex/_generated/api";
 import { FunctionReturnType } from "convex/server";
 import { twMerge } from "tailwind-merge";
 import { z } from "zod";

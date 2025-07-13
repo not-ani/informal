@@ -1,8 +1,8 @@
 import { useQuery } from "convex/react";
 import { FormDetails } from "../details";
 import { FormFields } from "./fields";
-import { api } from "@/convex/_generated/api";
-import { Id } from "@/convex/_generated/dataModel";
+import { api } from "@convex/_generated/api";
+import { Id } from "@convex/_generated/dataModel";
 
 export function Form({ id }: { id: string }) {
   const formDetails = useQuery(api.forms.get, { formId: id as Id<"forms"> });

@@ -1,4 +1,4 @@
-import { Id } from "@/convex/_generated/dataModel";
+import { Id } from "@convex/_generated/dataModel";
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 
@@ -21,9 +21,9 @@ export type FieldDef = {
   | 'checkbox'
   | 'file'
   ;
-  required?: boolean;
-  options?: string[];
-  default?: unknown;
+  required?: boolean;       // optional extras
+  options?: string[];       // choices for “mcq”
+  default?: unknown;        // custom default
 };
 
 /**
@@ -53,6 +53,7 @@ export function buildFormSchema(fields: FieldDef[]) {
         break;
 
       case 'file':
+        // file URL 
         t = z
           .string()
           .url('Invalid file URL');
@@ -64,6 +65,7 @@ export function buildFormSchema(fields: FieldDef[]) {
         break;
 
       case 'mcq':
+        // single answer – treat as enum of allowed options if provided
         t = field.options?.length
           ? z.enum([...field.options] as [string, ...string[]])
           : z.string();
@@ -73,6 +75,8 @@ export function buildFormSchema(fields: FieldDef[]) {
         t = z.any();
     }
 
+    // Add required / optional constraint only for non-number fields
+    // (number fields handle this in their preprocessing)
     if (field.type !== 'number') {
       t = field.required ? t : t.optional();
     }

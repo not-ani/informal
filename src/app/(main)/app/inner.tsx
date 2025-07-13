@@ -1,7 +1,7 @@
 'use client';
 
 import { Authenticated, Preloaded, useMutation, usePreloadedQuery } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Send } from "lucide-react";

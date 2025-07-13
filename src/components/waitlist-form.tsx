@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery } from "convex/react";
-import { api } from "../convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { waitlistFormSchema, type WaitlistFormData } from "@/lib/validations/waitlist";

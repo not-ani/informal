@@ -1,4 +1,4 @@
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { autoCompleteSchema } from "@/lib/utils";
 import { google } from "@ai-sdk/google";
 import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";

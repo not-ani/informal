@@ -1,6 +1,8 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { FieldType } from "../lib/utils";
+
+import { FieldType } from "../src/lib/utils";
+
 export const addField = mutation({
   args: {
     formId: v.string(),

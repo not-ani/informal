@@ -1,6 +1,6 @@
 "use client";
 import { Button } from "@/components/ui/button";
-import { api } from "@/convex/_generated/api";
+import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 import React from "react";
