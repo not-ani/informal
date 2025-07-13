@@ -18,7 +18,7 @@ export default function Page() {
           defaultSize={60}
           minSize={30}
           maxSize={75}
-          className="bg-muted flex flex-col gap-10 h-screen pt-10 items-center lg:min-w-2/3 overflow-y-auto h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent "
+          className="bg-muted flex flex-col gap-10 pt-10 items-center lg:min-w-2/3 h-screen overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent "
         >
           <Form id={id} />
         </ResizablePanel>

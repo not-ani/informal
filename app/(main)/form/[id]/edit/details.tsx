@@ -78,7 +78,7 @@ export function FormDetails({
                   <FormItem>
                     <FormControl>
                       <Input
-                        className="h-8 p-2 !text-3xl w-full border-transparent bg-card text-left shadow-none hover:bg-input/31 focus-visible:border-none focus-visible:bg-background"
+                        className="h-8 p-2 !text-3xl w-full border-transparent bg-transparent text-left shadow-none hover:bg-input/10 focus-visible:border-none focus-visible:bg-transparent"
                         {...field}
                         onChange={(e) => {
                           field.onChange(e);
@@ -99,7 +99,7 @@ export function FormDetails({
                   <FormItem>
                     <FormControl>
                       <Textarea
-                        className="h-16 p-2 w-full border-transparent bg-card text-left shadow-none hover:bg-input/31 focus-visible:border-none focus-visible:bg-background"
+                        className="h-16 p-2 w-full border-transparent bg-transparent text-left shadow-none hover:bg-input/10 focus-visible:border-none focus-visible:bg-transparent"
                         placeholder="Description"
                         {...field}
                         onChange={(e) => {

@@ -1,35 +1,20 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
-import { AnyDataModel, GenericMutationCtx } from "convex/server";
-const generateUniqueSlug = async (ctx: GenericMutationCtx<AnyDataModel>) => {
-  let tries = 0;
-  while (tries < 5) {
-    const randomString = [...Array(5)]
-      .map(() => Math.random().toString(36)[2])
-      .join("");
-    const existingForm = await ctx.db
-      .query("forms")
-      .filter((q) => q.eq(q.field("slug"), randomString))
-      .first();
-    if (!existingForm) {
-      return randomString;
-    }
-    tries++;
-  }
-  throw new ConvexError("Failed to generate a unique slug");
-};
+
 export const create = mutation({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
+
     if (identity === null) {
       throw new Error("Not authenticated");
     }
+
     const newFormId = await ctx.db.insert("forms", {
       createdBy: identity.tokenIdentifier,
-      slug: await generateUniqueSlug(ctx),
       name: "Untitled Form",
       description: "This is a description",
     });
+
     return newFormId;
   },
 });
@@ -62,7 +47,6 @@ export const getFormContext = query({
 export const createForm = mutation({
   args: {
     createdBy: v.string(),
-    slug: v.string(),
     name: v.string(),
     description: v.string(),
     defaultRequired: v.boolean(),
@@ -74,7 +58,6 @@ export const createForm = mutation({
     }
     const newFormId = await ctx.db.insert("forms", {
       createdBy: identity.tokenIdentifier,
-      slug: args.slug,
       name: args.name,
       description: args.description,
       defaultRequired: args.defaultRequired,
@@ -82,55 +65,38 @@ export const createForm = mutation({
     return newFormId;
   },
 });
+
 export const update = mutation({
   args: {
     formId: v.id("forms"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
-    slug: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    console.log("update", args);
     const identity = await ctx.auth.getUserIdentity();
     if (identity === null) {
       throw new Error("Not authenticated");
     }
+
     const form = await ctx.db
       .query("forms")
       .filter((q) =>
         q.and(
           q.eq(q.field("_id"), args.formId),
-          q.eq(q.field("createdBy"), identity.tokenIdentifier),
         ),
       )
       .unique();
+
+
     if (!form) {
+      console.log(form);
       throw new Error("Form not found");
-    }
-
-    const formBySlug = await ctx.db
-      .query("forms")
-      .filter((q) => q.eq(q.field("slug"), args.slug))
-      .first();
-    if (formBySlug && formBySlug._id !== args.formId) {
-      throw new ConvexError("Form with this slug already exists");
-    }
-
-    const formsOfThisUser = await ctx.db
-      .query("forms")
-      .filter((q) => q.eq(q.field("createdBy"), identity.tokenIdentifier))
-      .collect();
-    const sameNameForms = formsOfThisUser.filter(
-      (f) => f.name === args.name?.trim(),
-    );
-
-    if (sameNameForms.length > 0 && sameNameForms[0]._id !== args.formId) {
-      throw new ConvexError("Form with this name already exists");
     }
 
     await ctx.db.patch(args.formId, {
       name: args.name,
       description: args.description,
-      slug: args.slug,
     });
   },
 });
@@ -191,28 +157,14 @@ export const get = query({
   },
 });
 
-export const getBySlug = query({
-  args: {
-    slug: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const form = await ctx.db
-      .query("forms")
-      .filter((q) => q.eq(q.field("slug"), args.slug))
-      .unique();
-    if (!form) {
-      throw new Error("Form not found");
-    }
-    return form;
-  },
-});
-
 export const getUserForms = query({
-  handler: async (ctx, args) => {
+  handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
+
     if (identity === null) {
       throw new Error("Not authenticated");
     }
+
     return ctx.db
       .query("forms")
       .filter((q) => q.eq(q.field("createdBy"), identity.tokenIdentifier))

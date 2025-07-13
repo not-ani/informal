@@ -10,21 +10,23 @@ export default defineSchema({
   numbers: defineTable({
     value: v.number(),
   }),
+
   waitlist: defineTable({
     email: v.string(),
   }),
+
   forms: defineTable({
     createdBy: v.string(),
     defaultRequired: v.optional(v.boolean()),
     description: v.optional(v.string()),
     name: v.optional(v.string()),
-    slug: v.string(),
-  }).index("by_slug", ["slug"]),
+  }).index("by_createdBy", ["createdBy"]),
+
   form_responses: defineTable({
     formId: v.id("forms"),
-    userEmail: v.optional(v.string()),
-    slug: v.optional(v.string()),
+    userId: v.optional(v.string()),
   }).index("by_formId", ["formId"]),
+
   field_responses: defineTable({
     formId: v.id("forms"),
     fieldId: v.id("form_fields"),
@@ -47,6 +49,7 @@ export default defineSchema({
         }),
       ),
     ),
+
     type: v.union(
       v.literal("text"),
       v.literal("textarea"),

@@ -1,11 +1,12 @@
 import Home from "./inner";
 import { preloadQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { getAuthToken } from "@/lib/auth";
 
 export default async function HomePage() {
+  const token = await getAuthToken()
   const preloaded = await preloadQuery(api.forms.getUserForms, {}, {
-    token: await convexAuthNextjsToken()
+    token: token
   });
 
   return (

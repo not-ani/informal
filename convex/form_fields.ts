@@ -90,24 +90,6 @@ export const getFormFields = query({
   },
 });
 
-export const getBySlug = query({
-  args: {
-    slug: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const form = await ctx.db
-      .query("forms")
-      .filter((q) => q.eq(q.field("slug"), args.slug))
-      .unique();
-    if (!form) {
-      throw new Error("Form not found");
-    }
-    return ctx.db
-      .query("form_fields")
-      .filter((q) => q.eq(q.field("formId"), form._id))
-      .collect();
-  },
-});
 
 export const updateField = mutation({
   args: {
@@ -141,16 +123,16 @@ export const updateField = mutation({
     if (!form || form.createdBy !== identity.tokenIdentifier) {
       throw new Error("Form not found");
     }
-    
+
     const { fieldId, formId, ...updates } = args;
-    
+
     // Define a type for the data to be patched, ensuring it matches the schema expectations
     type FormFieldPatchData = {
       name?: string;
       type?: FieldType;
       order?: number;
       required?: boolean;
-      selectOptions?: {name: string, order: number}[];
+      selectOptions?: { name: string, order: number }[];
     };
 
     const updateData: FormFieldPatchData = {};
@@ -175,5 +157,5 @@ export const updateField = mutation({
       await ctx.db.patch(args.fieldId, updateData);
     }
   },
-}); 
+});
 

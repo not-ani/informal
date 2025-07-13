@@ -5,22 +5,23 @@ import z from "zod";
 import { fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { convexAuthNextjsToken } from "@convex-dev/auth/nextjs/server";
+import { getAuthToken } from "@/lib/auth";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
-  const { messages, formId } = await req.json();
+  try {
+    const { messages, formId } = await req.json();
 
-  const token = await convexAuthNextjsToken();
+    const token = await getAuthToken();
 
-  if (!token) {
-    return new Response("Unauthorized", { status: 401 });
-  }
+    if (!token) {
+      return new Response((new Error("Unauthorized"))?.message, { status: 401 });
+    }
 
-  const result = streamText({
-    model: google("gemini-2.0-flash"),
-    system: `
+    const result = streamText({
+      model: google("gemini-2.0-flash"),
+      system: `
       You are an AI assistant that helps people create and manage forms. You are an AI first google form.
       You must NEVER answer questions that are not related to form creation or management.
 
@@ -43,140 +44,163 @@ export async function POST(req: Request) {
 
       the formId is ${formId}
     `,
-    messages: convertToCoreMessages(messages),
-    maxSteps: 10,
-    tools: {
-      getFormInfo: tool({
-        description: "Get form info",
-        parameters: z.object({
-          formId: z.string(),
+      messages: convertToCoreMessages(messages),
+      maxSteps: 10,
+      tools: {
+        getFormInfo: tool({
+          description: "Get form info",
+          parameters: z.object({
+            formId: z.string(),
+          }),
+          execute: async ({ formId }) => {
+            const form = formId as Id<"forms">;
+            const formInfo = await fetchQuery(
+              api.forms.getFormContext,
+              {
+                formId: form,
+              },
+              {
+                token,
+              },
+            );
+            return formInfo;
+          },
         }),
-        execute: async ({ formId }) => {
-          const form = formId as Id<"forms">;
-          const formInfo = await fetchQuery(api.forms.getFormContext, {
-            formId: form,
-          }, {
-            token,
-          });
-          return formInfo;
-        },
-      }),
-      createField: tool({
-        description: "Create a new field for a form",
-        parameters: z.object({
-          formId: z.string(),
-          name: z.string(),
-          type: fieldTypeSchema,
-          order: z.number(),
-          required: z.boolean(),
-          selectOptions: z.optional(
-            z.array(
-              z.object({
-                name: z.string(),
-                order: z.number(),
-              }),
-            ),
-          ),
-        }),
-        execute: async ({
-          formId,
-          name,
-          type,
-          order,
-          required,
-          selectOptions,
-        }) => {
-          await fetchMutation(api.form_fields.addField, {
-            formId,
-            name,
-            type,
-            order,
-            required,
-            selectOptions,
-          }, {
-            token,
-          });
-          return "Field created successfully";
-        },
-      }),
-      updateField: tool({
-        description: "Update an existing field for a form",
-        parameters: z.object({
-          fieldId: z.string(),
-          formId: z.string(),
-          name: z.string().optional(),
-          type: fieldTypeSchema,
-          order: z.number().optional(),
-          required: z.boolean().optional(),
-          selectOptions: z
-            .optional(
+        createField: tool({
+          description: "Create a new field for a form",
+          parameters: z.object({
+            formId: z.string(),
+            name: z.string(),
+            type: fieldTypeSchema,
+            order: z.number(),
+            required: z.boolean(),
+            selectOptions: z.optional(
               z.array(
                 z.object({
                   name: z.string(),
                   order: z.number(),
                 }),
               ),
-            )
-            .optional(),
-        }),
-        execute: async ({
-          fieldId,
-          formId,
-          name,
-          type,
-          order,
-          required,
-          selectOptions,
-        }) => {
-          const fId = fieldId as Id<"form_fields">;
-          const form = formId as Id<"forms">;
-          const t = type as FieldType;
-          await fetchMutation(api.form_fields.updateField, {
-            formId: form,
-            fieldId: fId,
+            ),
+          }),
+          execute: async ({
+            formId,
             name,
-            type: t,
+            type,
             order,
             required,
             selectOptions,
-          }, {
-            token,
-          });
-          return "Field updated successfully";
-        },
-      }),
-      deleteField: tool({
-        description: "Delete an existing field for a form",
-        parameters: z.object({
-          fieldId: z.string(),
+          }) => {
+            await fetchMutation(
+              api.form_fields.addField,
+              {
+                formId,
+                name,
+                type,
+                order,
+                required,
+                selectOptions,
+              },
+              {
+                token,
+              },
+            );
+            return "Field created successfully";
+          },
         }),
-        execute: async ({ fieldId }) => {
-          const fId = fieldId as Id<"form_fields">;
-          await fetchMutation(api.form_fields.deleteField, {
-            fieldId: fId,
-          }, {
-            token,
-          });
-          return "Field deleted successfully";
-        },
-      }),
-      deleteForm: tool({
-        description: "Delete an existing form",
-        parameters: z.object({
-          formId: z.string(),
+        updateField: tool({
+          description: "Update an existing field for a form",
+          parameters: z.object({
+            fieldId: z.string(),
+            formId: z.string(),
+            name: z.string().optional(),
+            type: fieldTypeSchema,
+            order: z.number().optional(),
+            required: z.boolean().optional(),
+            selectOptions: z
+              .optional(
+                z.array(
+                  z.object({
+                    name: z.string(),
+                    order: z.number(),
+                  }),
+                ),
+              )
+              .optional(),
+          }),
+          execute: async ({
+            fieldId,
+            formId,
+            name,
+            type,
+            order,
+            required,
+            selectOptions,
+          }) => {
+            const fId = fieldId as Id<"form_fields">;
+            const form = formId as Id<"forms">;
+            const t = type as FieldType;
+            await fetchMutation(
+              api.form_fields.updateField,
+              {
+                formId: form,
+                fieldId: fId,
+                name,
+                type: t,
+                order,
+                required,
+                selectOptions,
+              },
+              {
+                token,
+              },
+            );
+            return "Field updated successfully";
+          },
         }),
-        execute: async ({ formId }) => {
-          const form = formId as Id<"forms">;
-          await fetchMutation(api.forms.deleteForm, {
-            formId: form,
-          }, {
-            token,
-          });
-          return "Form deleted successfully";
-        },
-      }),
-    },
-  });
+        deleteField: tool({
+          description: "Delete an existing field for a form",
+          parameters: z.object({
+            fieldId: z.string(),
+          }),
+          execute: async ({ fieldId }) => {
+            const fId = fieldId as Id<"form_fields">;
+            await fetchMutation(
+              api.form_fields.deleteField,
+              {
+                fieldId: fId,
+              },
+              {
+                token,
+              },
+            );
+            return "Field deleted successfully";
+          },
+        }),
+        deleteForm: tool({
+          description: "Delete an existing form",
+          parameters: z.object({
+            formId: z.string(),
+          }),
+          execute: async ({ formId }) => {
+            const form = formId as Id<"forms">;
+            await fetchMutation(
+              api.forms.deleteForm,
+              {
+                formId: form,
+              },
+              {
+                token,
+              },
+            );
+            return "Form deleted successfully";
+          },
+        }),
+      },
+    });
 
-  return result.toDataStreamResponse();
+    return result.toDataStreamResponse();
+  } catch (error) {
+    return new Response(error.message, { status: 500 });
+  }
 }
