@@ -18,18 +18,22 @@ export default defineSchema({
   forms: defineTable({
     createdBy: v.string(),
     defaultRequired: v.optional(v.boolean()),
+    authRequired: v.optional(v.boolean()),
     description: v.optional(v.string()),
     name: v.optional(v.string()),
   }).index("by_createdBy", ["createdBy"]),
 
   form_responses: defineTable({
     formId: v.id("forms"),
-    userId: v.optional(v.string()),
-  }).index("by_formId", ["formId"]),
+    userEmail: v.optional(v.string()),
+  })
+    .index("by_formId", ["formId"])
+    .index("by_applicantId_and_jobId", ["userEmail", "formId"]),
 
   field_responses: defineTable({
     formId: v.id("forms"),
     fieldId: v.id("form_fields"),
+    userEmail: v.optional(v.string()),
     formResponseId: v.id("form_responses"),
     response: v.union(v.string(), v.array(v.string())),
   })
@@ -38,6 +42,7 @@ export default defineSchema({
     .index("by_formResponseId", ["formResponseId"]),
   form_fields: defineTable({
     formId: v.string(),
+    default: v.optional(v.any()),
     name: v.string(),
     order: v.float64(),
     required: v.optional(v.boolean()),

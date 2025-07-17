@@ -1,6 +1,7 @@
-import { Plus, Crown, User } from "lucide-react";
+import { Plus, Crown } from "lucide-react";
 import React from "react";
 import { Button } from "./ui/button";
+import { UserButton } from "@clerk/nextjs";
 
 export const Navbar = () => {
   return (
@@ -19,7 +20,7 @@ export const Navbar = () => {
             Upgrade
           </Button>
           <Button variant="ghost" size="icon">
-            <User className="h-4 w-4" />
+            <UserButton />
           </Button>
         </div>
       </div>

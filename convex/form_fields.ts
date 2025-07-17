@@ -10,10 +10,14 @@ export const addField = mutation({
     type: v.string(),
     order: v.number(),
     required: v.boolean(),
-    selectOptions: v.optional(v.array(v.object({
-      name: v.string(),
-      order: v.number(),
-    }))),
+    selectOptions: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          order: v.number(),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -24,7 +28,7 @@ export const addField = mutation({
       .query("forms")
       .filter((q) => q.eq(q.field("_id"), args.formId))
       .unique();
-    if (!form || form.createdBy !== identity.tokenIdentifier) {
+    if (!form || form.createdBy !== identity.email) {
       throw new Error("Form not found");
     }
     const newFormId = await ctx.db.insert("form_fields", {
@@ -55,7 +59,7 @@ export const deleteField = mutation({
       .query("forms")
       .filter((q) => q.eq(q.field("_id"), field.formId))
       .unique();
-    if (!form || form.createdBy !== identity.tokenIdentifier) {
+    if (!form || form.createdBy !== identity.email) {
       throw new Error("Form not found");
     }
 
@@ -92,7 +96,6 @@ export const getFormFields = query({
   },
 });
 
-
 export const updateField = mutation({
   args: {
     fieldId: v.id("form_fields"),
@@ -101,10 +104,14 @@ export const updateField = mutation({
     type: v.optional(v.string()),
     order: v.optional(v.number()),
     required: v.optional(v.boolean()),
-    selectOptions: v.optional(v.array(v.object({
-      name: v.string(),
-      order: v.number(),
-    }))),
+    selectOptions: v.optional(
+      v.array(
+        v.object({
+          name: v.string(),
+          order: v.number(),
+        }),
+      ),
+    ),
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -122,10 +129,12 @@ export const updateField = mutation({
       .query("forms")
       .withIndex("by_id", (q) => q.eq("_id", args.formId))
       .unique();
-    if (!form || form.createdBy !== identity.tokenIdentifier) {
+
+    if (!form || form.createdBy !== identity.email) {
       throw new Error("Form not found");
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { fieldId, formId, ...updates } = args;
 
     // Define a type for the data to be patched, ensuring it matches the schema expectations
@@ -134,7 +143,7 @@ export const updateField = mutation({
       type?: FieldType;
       order?: number;
       required?: boolean;
-      selectOptions?: { name: string, order: number }[];
+      selectOptions?: { name: string; order: number }[];
     };
 
     const updateData: FormFieldPatchData = {};
@@ -160,4 +169,3 @@ export const updateField = mutation({
     }
   },
 });
-

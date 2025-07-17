@@ -37,27 +37,47 @@ export function FieldSelect({
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel className="text-sm font-semibold ">Field Types</DropdownMenuLabel>
+        <DropdownMenuLabel className="text-sm font-semibold ">
+          Field Types
+        </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-        <DropdownMenuItem onSelect={() => setFieldType("text")}>Short Answer</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setFieldType("textarea")}>Paragraph</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("text")}>
+            Short Answer
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("textarea")}>
+            Paragraph
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-        <DropdownMenuItem onSelect={() => setFieldType("number")}>Number</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setFieldType("date")}>Date</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setFieldType("time")}>Time</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("number")}>
+            Number
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("date")}>
+            Date
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("time")}>
+            Time
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-        <DropdownMenuItem onSelect={() => setFieldType("checkbox")}>Checkbox</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setFieldType("select")}>Dropdown</DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => setFieldType("MCQ")}>Multiple Choice</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("checkbox")}>
+            Checkbox
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("select")}>
+            Dropdown
+          </DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("MCQ")}>
+            Multiple Choice
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-        <DropdownMenuItem onSelect={() => setFieldType("file")}>File Upload</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setFieldType("file")}>
+            File Upload
+          </DropdownMenuItem>
         </DropdownMenuGroup>
       </DropdownMenuContent>
     </DropdownMenu>

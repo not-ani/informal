@@ -7,7 +7,8 @@ import {
   ResizableHandle,
 } from "@/components/ui/resizable";
 import { useParams } from "next/navigation";
-import { Chat } from "./chat";
+import { Chat } from "./_chat";
+
 export default function Page() {
   const { id } = useParams<{ id: string }>();
 

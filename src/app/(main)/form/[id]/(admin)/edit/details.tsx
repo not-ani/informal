@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useFormContext } from "../form-context";
 
 const formSchema = z.object({
   name: z.string(),
@@ -28,12 +29,11 @@ type FormDetails = {
 
 export function FormDetails({
   id,
-  formDetails,
 }: {
   id: string;
-  formDetails: FormDetails;
 }) {
   const updateForm = useMutation(api.forms.update);
+  const formDetails = useFormContext()
 
   // Debounce ref
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -42,8 +42,8 @@ export function FormDetails({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: formDetails.name ?? "Untitled Form",
-      description: formDetails.description ?? "",
+      name: formDetails?.name ?? "Untitled Form",
+      description: formDetails?.description ?? "",
     },
   });
 

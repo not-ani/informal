@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FC } from "react";
 import { UseFormReturn } from "react-hook-form";
 
@@ -14,31 +15,31 @@ const renderField = (def: FieldDef, form: UseFormReturn<any>) => {
   const { control } = form;
 
   if (def.type === "text" || def.type === "number") {
-    return <InputField def={def} control={control} />;
+    return <InputField key={def._id} def={def} control={control} />;
   }
 
   if (def.type === "textarea") {
-    return <TextareaField def={def} control={control} />;
+    return <TextareaField def={def} control={control} key={def._id} />;
   }
 
   if (def.type === "file") {
     return <FileUploadField key={def._id} def={def} control={control} />;
   }
 
-  if (def.type === "mcq") {
-    return <MCQField def={def} control={control} />;
+  if (def.type === "MCQ") {
+    return <MCQField def={def} control={control} key={def._id} />;
   }
 
   if (def.type === "checkbox") {
-    return <CheckboxField def={def} control={control} />;
+    return <CheckboxField def={def} control={control} key={def._id} />;
   }
 
   if (def.type === "select") {
-    return <SelectField def={def} control={control} />;
+    return <SelectField def={def} control={control} key={def._id} />;
   }
 
   if (def.type === "date") {
-    return <DateField def={def} control={control} />;
+    return <DateField def={def} control={control} key={def._id} />;
   }
 
   if (def.type === "time") {

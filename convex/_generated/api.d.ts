@@ -13,6 +13,7 @@ import type {
   FilterApi,
   FunctionReference,
 } from "convex/server";
+import type * as auth from "../auth.js";
 import type * as form_fields from "../form_fields.js";
 import type * as form_responses from "../form_responses.js";
 import type * as forms from "../forms.js";
@@ -29,6 +30,7 @@ import type * as waitlist from "../waitlist.js";
  * ```
  */
 declare const fullApi: ApiFromModules<{
+  auth: typeof auth;
   form_fields: typeof form_fields;
   form_responses: typeof form_responses;
   forms: typeof forms;
