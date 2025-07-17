@@ -42,8 +42,8 @@ export function FormDetails({
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: formDetails?.name ?? "Untitled Form",
-      description: formDetails?.description ?? "",
+      name: formDetails?.name,
+      description: formDetails?.description,
     },
   });
 

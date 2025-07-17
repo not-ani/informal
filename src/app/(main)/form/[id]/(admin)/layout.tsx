@@ -13,8 +13,11 @@ export default async function Layout({
   const id = (await params).id;
   return (
     <FormContextProvider id={id}>
+      <div className="h-screen overflow-hidden">
+
       <Navbar />
       {children}
+      </div>
     </FormContextProvider>
   );
 }

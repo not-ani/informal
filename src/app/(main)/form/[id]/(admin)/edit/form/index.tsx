@@ -12,7 +12,7 @@ export function Form({ id }: { id: string }) {
     return <div>Form not found</div>;
   }
   return (
-    <div className="w-2/3 md:w-4/5 lg:w-5/8  px-4">
+    <div className="w-2/3 md:w-4/5 lg:w-5/8  px-4 ">
       <FormDetails id={id} />
       <div className="mt-10">
         <FormFields id={id} defaultRequired={formDetails.defaultRequired ?? false} />

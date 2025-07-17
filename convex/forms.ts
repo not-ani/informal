@@ -280,3 +280,66 @@ export const updateForm = mutation({
     });
   },
 });
+
+export const deleteFormWithAllData = mutation({
+  args: {
+    formId: v.id("forms"),
+  },
+  returns: v.null(),
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+
+    if (identity === null) {
+      throw new Error("Not authenticated");
+    }
+
+    const form = await ctx.db
+      .query("forms")
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("_id"), args.formId),
+          q.eq(q.field("createdBy"), identity.email),
+        ),
+      )
+      .unique();
+
+    if (!form) {
+      throw new Error("Form not found");
+    }
+
+    // Delete all field responses for this form
+    const fieldResponses = await ctx.db
+      .query("field_responses")
+      .withIndex("by_formId", (q) => q.eq("formId", args.formId))
+      .collect();
+    
+    for (const fieldResponse of fieldResponses) {
+      await ctx.db.delete(fieldResponse._id);
+    }
+
+    // Delete all form responses for this form
+    const formResponses = await ctx.db
+      .query("form_responses")
+      .withIndex("by_formId", (q) => q.eq("formId", args.formId))
+      .collect();
+      
+    for (const formResponse of formResponses) {
+      await ctx.db.delete(formResponse._id);
+    }
+
+    // Delete all form fields for this form
+    const formFields = await ctx.db
+      .query("form_fields")
+      .withIndex("by_formId", (q) => q.eq("formId", args.formId))
+      .collect();
+      
+    for (const field of formFields) {
+      await ctx.db.delete(field._id);
+    }
+
+    // Finally, delete the form itself
+    await ctx.db.delete(args.formId);
+
+    return null;
+  },
+});
