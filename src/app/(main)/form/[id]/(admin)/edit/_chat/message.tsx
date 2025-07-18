@@ -143,7 +143,12 @@ const PurePreviewMessage = ({
               }
 
               if (type === "tool-invocation") {
-                return <ToolInvocationDisplay toolInvocation={part.toolInvocation} />;
+                return (
+                  <ToolInvocationDisplay
+                    key={key}
+                    toolInvocation={part.toolInvocation}
+                  />
+                );
               }
             })}
 
