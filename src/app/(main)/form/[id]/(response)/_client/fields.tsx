@@ -10,6 +10,7 @@ import { Id } from "@convex/_generated/dataModel";
 import { Form } from "@/components/ui/form";
 import { DynamicFormFields } from "@/generator/ui";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 type Fields = QueryData["fields"];
 
@@ -22,6 +23,7 @@ export function ResponseForm({
 }) {
   const { formSchema, defaultValues, nameToId } = buildFormSchema(fields);
   const submitApplication = useMutation(api.forms.submitResponse);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,6 +49,7 @@ export function ResponseForm({
       });
       toast.success("Application submitted successfully!");
       form.reset();
+      router.push("/success");
     } catch (error) {
       console.error("Error submitting application:", error);
       toast.error("Failed to submit application. Please try again.");

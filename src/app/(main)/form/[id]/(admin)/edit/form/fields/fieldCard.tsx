@@ -46,7 +46,7 @@ export function FieldCard({
     <div ref={setNodeRef} style={style} {...attributes}>
       <Card
         onClick={onSelect}
-        className={`${isActive ? "border-2 border-primary" : ""} w-full`}
+        className={`${isActive ? "border-2 border-primary" : ""} w-full bg-card`}
       >
         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 p-4">
           <div className="flex items-center gap-2 w-full sm:w-auto">

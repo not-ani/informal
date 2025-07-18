@@ -17,7 +17,7 @@ import {
 import { Tooltip, TooltipTrigger } from "@/components/ui/tooltip";
 import { TooltipContent } from "@radix-ui/react-tooltip";
 import { useUser } from "@clerk/nextjs";
-import { ChevronDownIcon, EyeIcon} from "lucide-react";
+import { ChevronDownIcon, EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useFormContext } from "./form-context";
@@ -44,7 +44,7 @@ export const Navbar = () => {
   ) || { path: pathname, label: "Unknown" };
 
   return (
-    <header className="border-b-0 px-4 md:px-6">
+    <header className="border-b-2 px-4 md:px-6">
       <div className="bg-background  h-12 flex flex-row justify-between items-center w-full gap-4">
         <Breadcrumb>
           <BreadcrumbList>
@@ -87,7 +87,6 @@ export const Navbar = () => {
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
-
         <div className="flex gap-4 items-center justify-evenly">
           <Tooltip>
             <TooltipTrigger asChild>

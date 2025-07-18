@@ -19,7 +19,7 @@ export default function Page() {
           defaultSize={60}
           minSize={30}
           maxSize={75}
-          className="bg-muted flex flex-col gap-10 pt-10 items-center lg:min-w-2/3 h-screen overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent "
+          className="bg-background flex flex-col gap-10 pt-10 items-center lg:min-w-2/3 h-screen overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent "
         >
           <div className="overflow-y-scroll w-full items-center flex flex-col gap-10 pt-10">
             <Form id={id} />
