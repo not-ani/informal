@@ -53,17 +53,17 @@ const inviteSchema = z.object({
 });
 
 interface CollaboratorsProps {
-  formId: string;
+  formId: Id<"forms">;
 }
 
 export function Collaborators({ formId }: CollaboratorsProps) {
   const [isInviting, setIsInviting] = useState(false);
 
   const collaborators = useQuery(api.collaborators.listCollaborators, {
-    formId: formId as Id<"forms">,
+    formId: formId,
   });
   const permissions = useQuery(api.collaborators.getFormPermissions, {
-    formId: formId as Id<"forms">,
+    formId: formId,
   });
 
   const inviteCollaborator = useMutation(api.collaborators.inviteCollaborator);
@@ -78,10 +78,19 @@ export function Collaborators({ formId }: CollaboratorsProps) {
     },
   });
 
+  // Extract role toggle logic into a separate function
+  const toggleRole = (currentRole: "owner" | "editor" | "viewer"): "editor" | "viewer" => {
+    if (currentRole === "owner") {
+      // Owners cannot have their roles changed, default to editor
+      return "editor";
+    }
+    return currentRole === "editor" ? "viewer" : "editor";
+  };
+
   const onInvite = async (values: z.infer<typeof inviteSchema>) => {
     try {
       await inviteCollaborator({
-        formId: formId as Id<"forms">,
+        formId: formId,
         userEmail: values.email,
         role: values.role,
       });
@@ -89,7 +98,7 @@ export function Collaborators({ formId }: CollaboratorsProps) {
       form.reset();
       setIsInviting(false);
     } catch (error: unknown) {
-      toast.error((error as Error).message || "Failed to send invitation");
+      toast.error(error instanceof Error ? error.message : "Failed to send invitation");
     }
   };
 
@@ -142,6 +151,26 @@ export function Collaborators({ formId }: CollaboratorsProps) {
         return "outline";
     }
   };
+
+  // Handle loading states
+  if (permissions === undefined || collaborators === undefined) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Shield className="h-5 w-5" />
+            Collaborators
+          </CardTitle>
+          <CardDescription>Loading collaborators...</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center py-8">
+            <div className="h-8 w-8 animate-spin rounded-full border-4 border-gray-300 border-t-gray-900"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!permissions?.canManageCollaborators) {
     return (
@@ -278,14 +307,12 @@ export function Collaborators({ formId }: CollaboratorsProps) {
                           onClick={() =>
                             handleRoleUpdate(
                               collaborator._id,
-                              collaborator.role === "editor"
-                                ? "viewer"
-                                : "editor",
+                              toggleRole(collaborator.role),
                             )
                           }
                         >
                           Change to{" "}
-                          {collaborator.role === "editor" ? "Viewer" : "Editor"}
+                          {toggleRole(collaborator.role) === "viewer" ? "Viewer" : "Editor"}
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => handleRemove(collaborator._id)}
@@ -324,7 +351,7 @@ export function Collaborators({ formId }: CollaboratorsProps) {
   );
 }
 
-export function CollaboratorsDialog({ formId }: { formId: string }) {
+export function CollaboratorsDialog({ formId }: { formId: Id<"forms"> }) {
   return (
     <Dialog>
       <DialogTrigger asChild>

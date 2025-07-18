@@ -40,7 +40,7 @@ export default defineSchema({
     userEmail: v.optional(v.string()),
   })
     .index("by_formId", ["formId"])
-    .index("by_applicantId_and_jobId", ["userEmail", "formId"])
+    .index("by_userEmail_and_formId", ["userEmail", "formId"])
     .index("by_formId_and_userEmail", ["formId", "userEmail"]),
 
   field_responses: defineTable({

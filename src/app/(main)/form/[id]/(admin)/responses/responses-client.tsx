@@ -45,9 +45,15 @@ export function ResponsesPageClient({
       response.fieldResponses.forEach((fieldResponse) => {
         if (fieldResponse.fieldId === filterObject.field) {
           if (Array.isArray(fieldResponse.response)) {
-            fieldResponse.response.forEach((val: string) => values.add(val));
+            fieldResponse.response.forEach((val) => {
+              if (typeof val === 'string') {
+                values.add(val);
+              }
+            });
           } else {
-            values.add(fieldResponse.response);
+            if (typeof fieldResponse.response === 'string') {
+              values.add(fieldResponse.response);
+            }
           }
         }
       });
@@ -121,7 +127,7 @@ export function ResponsesPageClient({
       {responses.length === 0 ? (
         <ResponsesEmptyState responsesCount={responses.length} />
       ) : (
-        <ResponsesTable filteredResponses={responses} fields={fields} />
+        <ResponsesTable responses={responses} fields={fields} />
       )}
     </div>
   );

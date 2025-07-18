@@ -36,10 +36,12 @@ export function DangerZone({ formId }: DangerZoneProps) {
     } catch (error) {
       console.error("Failed to delete form:", error);
       toast.error("Failed to delete form");
+      setIsDeleting(false);
+      return; // Don't close dialog on error
     } finally {
       setIsDeleting(false);
-      setIsDeleteDialogOpen(false);
     }
+    setIsDeleteDialogOpen(false);
   };
 
   return (

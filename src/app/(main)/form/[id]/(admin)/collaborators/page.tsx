@@ -1,10 +1,10 @@
-"use client";
 import React from "react";
-import { useParams } from "next/navigation";
 import { Collaborators } from "../edit/collaborators";
+import { Id } from "@convex/_generated/dataModel";
 
-export default function CollaboratorsPage() {
-  const { id } = useParams<{ id: string }>();
+export default async function CollaboratorsPage({ params }: { params: { id: string } }) {
+
+  const { id } = await params;
 
   return (
     <main className="flex-1 p-6">
@@ -15,7 +15,7 @@ export default function CollaboratorsPage() {
             Manage who can access and edit this form.
           </p>
         </div>
-        <Collaborators formId={id} />
+        <Collaborators formId={id as Id<"forms">} />
       </div>
     </main>
   );

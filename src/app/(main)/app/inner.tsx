@@ -114,7 +114,13 @@ export default function Home({ preloaded }: HomeProps) {
                     <Button 
                       size="sm" 
                       variant="outline" 
-                      onClick={() => router.push(`/form/${form._id}/${form.userRole === "viewer" ? "" : "edit"}`)}
+                      onClick={() =>
+                        router.push(
+                          form.userRole === "viewer"
+                            ? `/form/${form._id}`
+                            : `/form/${form._id}/edit`
+                        )
+                      }
                     >
                       {form.userRole === "viewer" ? "View" : "Open"}
                     </Button>

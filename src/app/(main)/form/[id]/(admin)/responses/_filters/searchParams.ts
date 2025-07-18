@@ -1,3 +1,4 @@
+import "server-only";
 import { createLoader, parseAsString } from "nuqs/server";
 
 export const responsesFilters = {

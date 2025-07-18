@@ -37,8 +37,6 @@ alwaysApply: true
   
   Key Conventions
   - Use 'nuqs' for URL search parameter state management.
-  - Optimize Web Vitals (LCP, CLS, FID).
-    - Use only for Web API access in small components.
-  
+  - Optimize Web Vitals (LCP, CLS, FID) and limit Web-API access to small, isolated components.
 Follow Next.js & Convex docs for Data Fetching, Rendering, and Routing.
   

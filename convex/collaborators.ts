@@ -28,7 +28,7 @@ async function checkFormPermission(
   const collaboration = await ctx.db
     .query("form_collaborators")
     .withIndex("by_formId_and_userEmail", (q) =>
-      q.eq("formId", formId).eq("userEmail", identity.email!),
+      q.eq("formId", formId).eq("userEmail", identity.email),
     )
     .filter((q) => q.eq(q.field("status"), "accepted"))
     .unique();
@@ -65,19 +65,14 @@ export const inviteCollaborator = mutation({
     role: v.union(v.literal("editor"), v.literal("viewer")),
   },
   handler: async (ctx, args) => {
-    await checkFormPermission(ctx, args.formId, "owner");
-
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity?.email) {
-      throw new ConvexError("Not authenticated");
-    }
+    const { userEmail } = await checkFormPermission(ctx, args.formId, "owner");
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(args.userEmail)) {
       throw new ConvexError("Invalid email format");
     }
 
-    if (args.userEmail === identity.email) {
+    if (args.userEmail === userEmail) {
       throw new ConvexError("You cannot invite yourself");
     }
 
@@ -112,7 +107,7 @@ export const inviteCollaborator = mutation({
       userEmail: args.userEmail,
       role: args.role,
       status: "pending",
-      invitedBy: identity.email,
+      invitedBy: userEmail,
       invitedAt: Date.now(),
     });
 
@@ -265,18 +260,24 @@ export const getFormPermissions = query({
         canManageCollaborators: permission.role === "owner",
         role: permission.role,
       };
-    } catch {
-      return {
-        canView: false,
-        canEdit: false,
-        canManageCollaborators: false,
-        role: "none" as const,
-      };
+    } catch (error) {
+      if (error instanceof ConvexError) {
+        return {
+          canView: false,
+          canEdit: false,
+          canManageCollaborators: false,
+          role: "none" as const,
+        };
+      }
+      throw error;
     }
   },
 });
 
 export const getPendingInvitations = query({
+  args: {
+    formId: v.id("forms"),
+  },
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity?.email) {
@@ -286,7 +287,7 @@ export const getPendingInvitations = query({
     const pendingInvitations = await ctx.db
       .query("form_collaborators")
       .withIndex("by_userEmail_and_status", (q) =>
-        q.eq("userEmail", identity.email!).eq("status", "pending"),
+        q.eq("userEmail", identity.email).eq("status", "pending"),
       )
       .collect();
 
@@ -321,7 +322,7 @@ export const getPendingInvitationForForm = query({
     const pendingInvitation = await ctx.db
       .query("form_collaborators")
       .withIndex("by_formId_and_userEmail", (q) =>
-        q.eq("formId", args.formId).eq("userEmail", identity.email!),
+        q.eq("formId", args.formId).eq("userEmail", identity.email),
       )
       .filter((q) => q.eq(q.field("status"), "pending"))
       .unique();
@@ -345,22 +346,21 @@ export const getPendingInvitationForForm = query({
 export const getUserAccessibleForms = query({
   handler: async (ctx) => {
     const identity = await ctx.auth.getUserIdentity();
+
     if (!identity?.email) {
       return [];
     }
 
     const ownedForms = await ctx.db
       .query("forms")
-      .withIndex("by_createdBy", (q) => q.eq("createdBy", identity.email!))
+      .withIndex("by_createdBy", (q) => q.eq("createdBy", identity.email))
       .collect();
-
     const collaborations = await ctx.db
       .query("form_collaborators")
       .withIndex("by_userEmail_and_status", (q) =>
         q.eq("userEmail", identity.email!).eq("status", "accepted"),
       )
       .collect();
-
     const collaboratedForms = await Promise.all(
       collaborations.map(async (collab) => {
         const form = await ctx.db.get(collab.formId);
@@ -370,7 +370,9 @@ export const getUserAccessibleForms = query({
 
     const allForms = [
       ...ownedForms.map((form) => ({ ...form, userRole: "owner" as const })),
-      ...collaboratedForms.filter((form): form is NonNullable<typeof form> => form !== null),
+      ...collaboratedForms.filter(
+        (form): form is NonNullable<typeof form> => form !== null,
+      ),
     ];
 
     return allForms.sort((a, b) => b._creationTime - a._creationTime);
@@ -378,4 +380,3 @@ export const getUserAccessibleForms = query({
 });
 
 export { checkFormPermission };
-

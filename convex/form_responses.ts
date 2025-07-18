@@ -162,19 +162,9 @@ export const getDetailedFormResponses = query({
       }
     }
 
-    // Fetch all submissions for the form
-    let submissions = await ctx.db
-      .query("form_responses")
-      .withIndex("by_formId", (q) => q.eq("formId", args.formId))
-      .order("desc")
-      .collect();
-
-    // Apply date filtering early
-    if (args.date && args.date !== "all") {
-      submissions = submissions.filter(sub => matchesDateFilter(sub._creationTime, args.date));
-    }
-
-    // If filtering by userEmail specifically, use the index for better performance
+    let submissions;
+    
+    // Use optimized index when filtering by userEmail
     if (args.field === "userEmail" && args.fieldValue && args.fieldValue !== "") {
       submissions = await ctx.db
         .query("form_responses")
@@ -183,13 +173,19 @@ export const getDetailedFormResponses = query({
         )
         .order("desc")
         .collect();
-      
-      // Apply date filtering after userEmail filtering
-      if (args.date && args.date !== "all") {
-        submissions = submissions.filter(sub => matchesDateFilter(sub._creationTime, args.date));
-      }
+    } else {
+      // Fetch all submissions for the form
+      submissions = await ctx.db
+        .query("form_responses")
+        .withIndex("by_formId", (q) => q.eq("formId", args.formId))
+        .order("desc")
+        .collect();
     }
-
+    
+    // Apply date filtering once
+    if (args.date && args.date !== "all") {
+      submissions = submissions.filter(sub => matchesDateFilter(sub._creationTime, args.date));
+    }
     if (submissions.length === 0) {
       return [];
     }

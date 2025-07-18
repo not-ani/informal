@@ -23,11 +23,11 @@ interface Response {
 }
 
 interface ResponsesTableProps {
-  filteredResponses: Response[];
+  responses: Response[];
   fields: Field[];
 }
 
-export function ResponsesTable({ filteredResponses, fields }: ResponsesTableProps) {
+export function ResponsesTable({ responses, fields }: ResponsesTableProps) {
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -46,7 +46,7 @@ export function ResponsesTable({ filteredResponses, fields }: ResponsesTableProp
           </TableRow>
         </TableHeader>
         <TableBody>
-          {filteredResponses.map((response) => (
+          {responses.map((response) => (
             <TableRow key={response._id}>
               <TableCell className="font-medium">
                 {response.userEmail || (
