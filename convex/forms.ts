@@ -66,7 +66,9 @@ export const update = mutation({
       console.log(form);
       throw new Error("Form not found");
     }
-
+    if (form.createdBy !== identity.email) {
+      throw new Error("You do not have permission to update this form");
+    }
     await ctx.db.patch(args.formId, {
       name: args.name,
       description: args.description,
@@ -97,6 +99,9 @@ export const deleteForm = mutation({
 
     if (!form) {
       throw new Error("Form not found");
+    }
+    if (form.createdBy !== identity.email) {
+      throw new Error("You do not have permission to delete this form");
     }
     const formResponses = await ctx.db
       .query("form_responses")
@@ -272,7 +277,7 @@ export const updateForm = mutation({
     if (identity === null) {
       throw new Error("Not authenticated");
     }
-
+    // may require one here too
     await ctx.db.patch(args.formId, {
       name: args.name,
       description: args.description,
