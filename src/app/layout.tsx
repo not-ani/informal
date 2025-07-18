@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/theme";
 
 import { ClerkProvider } from "@clerk/nextjs";
 import ConvexClientProvider from "./providers/clerk";
+import { NuqsAdapter } from "nuqs/adapters/next/app";
 
 export const metadata: Metadata = {
   title: "Informal",
@@ -26,7 +27,7 @@ export default function RootLayout({
           <ClerkProvider
           >
             <ConvexClientProvider>
-              {children}
+              <NuqsAdapter>{children}</NuqsAdapter>
             </ConvexClientProvider>
           </ClerkProvider>
         </ThemeProvider>

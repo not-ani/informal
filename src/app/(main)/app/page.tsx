@@ -7,7 +7,7 @@ export default async function HomePage() {
   const token = await getAuthToken();
 
   const preloaded = await preloadQuery(
-    api.forms.getUserForms,
+    api.collaborators.getUserAccessibleForms,
     {},
     {
       token: token,

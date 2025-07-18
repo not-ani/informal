@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { checkFormPermission } from "./collaborators";
 
 export const create = mutation({
   handler: async (ctx) => {
@@ -50,31 +51,22 @@ export const update = mutation({
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     authRequired: v.optional(v.boolean()),
+    oneTime: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    console.log("update", args);
-    const identity = await ctx.auth.getUserIdentity();
-    if (identity === null) {
-      throw new Error("Not authenticated");
-    }
+    await checkFormPermission(ctx, args.formId, "editor");
 
-    const form = await ctx.db
-      .query("forms")
-      .filter((q) => q.and(q.eq(q.field("_id"), args.formId)))
-      .unique();
+    const { formId, ...updateFields } = args;
 
-    if (!form) {
-      console.log(form);
-      throw new Error("Form not found");
+    // filter undefined because undefined values are not are deleted
+    const updates = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      Object.entries(updateFields).filter(([_, value]) => value !== undefined),
+    );
+
+    if (Object.keys(updates).length > 0) {
+      await ctx.db.patch(formId, updates);
     }
-    if (form.createdBy !== identity.email) {
-      throw new Error("You do not have permission to update this form");
-    }
-    await ctx.db.patch(args.formId, {
-      name: args.name,
-      description: args.description,
-      authRequired: args.authRequired,
-    });
   },
 });
 
@@ -83,28 +75,8 @@ export const deleteForm = mutation({
     formId: v.id("forms"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
+    await checkFormPermission(ctx, args.formId, "owner");
 
-    if (identity === null) {
-      throw new Error("Not authenticated");
-    }
-
-    const form = await ctx.db
-      .query("forms")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("_id"), args.formId),
-          q.eq(q.field("createdBy"), identity.email),
-        ),
-      )
-      .unique();
-
-    if (!form) {
-      throw new Error("Form not found");
-    }
-    if (form.createdBy !== identity.email) {
-      throw new Error("You do not have permission to delete this form");
-    }
     const formResponses = await ctx.db
       .query("form_responses")
       .filter((q) => q.eq(q.field("formId"), args.formId))
@@ -179,10 +151,10 @@ export const submitResponse = mutation({
       throw new Error("Authentication required for this form");
     }
 
-    if (userEmail) {
+    if (userEmail && !form.oneTime) {
       const existingApplication = await ctx.db
         .query("form_responses")
-        .withIndex("by_applicantId_and_jobId", (q) =>
+        .withIndex("by_userEmail_and_formId", (q) =>
           q.eq("userEmail", userEmail).eq("formId", args.formId),
         )
         .first();
@@ -247,22 +219,12 @@ export const checkFormOwnership = query({
     formId: v.id("forms"),
   },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-
-    if (!identity?.email) {
+    try {
+      const permission = await checkFormPermission(ctx, args.formId, "viewer");
+      return permission.role === "owner";
+    } catch {
       return false;
     }
-
-    const form = await ctx.db
-      .query("forms")
-      .withIndex("by_id", (q) => q.eq("_id", args.formId))
-      .unique();
-
-    if (!form) {
-      return false;
-    }
-
-    return form.createdBy === identity.email;
   },
 });
 
@@ -272,27 +234,8 @@ export const deleteFormWithAllData = mutation({
   },
   returns: v.null(),
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
+    await checkFormPermission(ctx, args.formId, "owner");
 
-    if (identity === null) {
-      throw new Error("Not authenticated");
-    }
-
-    const form = await ctx.db
-      .query("forms")
-      .filter((q) =>
-        q.and(
-          q.eq(q.field("_id"), args.formId),
-          q.eq(q.field("createdBy"), identity.email),
-        ),
-      )
-      .unique();
-
-    if (!form) {
-      throw new Error("Form not found");
-    }
-
-    // Delete all field responses for this form
     const fieldResponses = await ctx.db
       .query("field_responses")
       .withIndex("by_formId", (q) => q.eq("formId", args.formId))
@@ -302,7 +245,6 @@ export const deleteFormWithAllData = mutation({
       await ctx.db.delete(fieldResponse._id);
     }
 
-    // Delete all form responses for this form
     const formResponses = await ctx.db
       .query("form_responses")
       .withIndex("by_formId", (q) => q.eq("formId", args.formId))
@@ -312,7 +254,6 @@ export const deleteFormWithAllData = mutation({
       await ctx.db.delete(formResponse._id);
     }
 
-    // Delete all form fields for this form
     const formFields = await ctx.db
       .query("form_fields")
       .withIndex("by_formId", (q) => q.eq("formId", args.formId))
@@ -322,10 +263,17 @@ export const deleteFormWithAllData = mutation({
       await ctx.db.delete(field._id);
     }
 
-    // Finally, delete the form itself
+    const collaborators = await ctx.db
+      .query("form_collaborators")
+      .withIndex("by_formId", (q) => q.eq("formId", args.formId))
+      .collect();
+
+    for (const collaborator of collaborators) {
+      await ctx.db.delete(collaborator._id);
+    }
+
     await ctx.db.delete(args.formId);
 
     return null;
   },
 });
-

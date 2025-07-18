@@ -21,6 +21,7 @@ import { ChevronDownIcon, EyeIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useFormContext } from "./form-context";
+import { CollaboratorsDialog } from "./edit/collaborators";
 
 export const Navbar = () => {
   const formContext = useFormContext();
@@ -31,14 +32,13 @@ export const Navbar = () => {
     return <div>Form not found</div>;
   }
 
-  // Define available admin routes
   const adminRoutes = [
     { path: `/form/${formContext._id}/edit`, label: "Edit Form" },
     { path: `/form/${formContext._id}/responses`, label: "Responses" },
+    { path: `/form/${formContext._id}/collaborators`, label: "Collaborators" },
     { path: `/form/${formContext._id}/settings`, label: "Settings" },
   ];
 
-  // Get current route info
   const currentRoute = adminRoutes.find((route) =>
     pathname.startsWith(route.path),
   ) || { path: pathname, label: "Unknown" };
@@ -50,7 +50,7 @@ export const Navbar = () => {
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/">LOGO</Link>
+                <Link href="/app">LOGO</Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
@@ -99,6 +99,7 @@ export const Navbar = () => {
             </TooltipTrigger>
             <TooltipContent>View Form</TooltipContent>
           </Tooltip>
+          <CollaboratorsDialog formId={formContext._id} />
         </div>
       </div>
     </header>

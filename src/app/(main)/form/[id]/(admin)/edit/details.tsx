@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { useFormContext } from "../form-context";
+import { PermissionWrapper } from "./permission-wrapper";
 
 const formSchema = z.object({
   name: z.string(),
@@ -35,10 +36,8 @@ export function FormDetails({
   const updateForm = useMutation(api.forms.update);
   const formDetails = useFormContext()
 
-  // Debounce ref
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Form setup
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -66,58 +65,64 @@ export function FormDetails({
   };
 
   return (
-    <Card className="w-full">
-      <CardHeader className="w-full">
-        <CardTitle className="flex flex-col gap-2">
-          <Form {...form}>
-            <div className="flex flex-col gap-4">
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input
-                        className="h-8 p-2 !text-3xl w-full border-transparent bg-transparent text-left shadow-none hover:bg-input/10 focus-visible:border-none focus-visible:bg-transparent"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          debouncedSave({
-                            ...form.getValues(),
-                            name: e.target.value,
-                          });
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Textarea
-                        className="h-16 p-2 w-full border-transparent bg-transparent text-left shadow-none hover:bg-input/10 focus-visible:border-none focus-visible:bg-transparent"
-                        placeholder="Description"
-                        {...field}
-                        onChange={(e) => {
-                          field.onChange(e);
-                          debouncedSave({
-                            ...form.getValues(),
-                            description: e.target.value,
-                          });
-                        }}
-                      />
-                    </FormControl>
-                  </FormItem>
-                )}
-              />
-            </div>
-          </Form>
-        </CardTitle>
-      </CardHeader>
-    </Card>
+    <PermissionWrapper
+      formId={id}
+      requiredPermission="edit"
+      fallbackMessage="You need editor permissions to modify form details."
+    >
+      <Card className="w-full">
+        <CardHeader className="w-full">
+          <CardTitle className="flex flex-col gap-2">
+            <Form {...form}>
+              <div className="flex flex-col gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Input
+                          className="h-8 p-2 !text-3xl w-full border-transparent bg-transparent text-left shadow-none hover:bg-input/10 focus-visible:border-none focus-visible:bg-transparent"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            debouncedSave({
+                              ...form.getValues(),
+                              name: e.target.value,
+                            });
+                          }}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea
+                          className="h-16 p-2 w-full border-transparent bg-transparent text-left shadow-none hover:bg-input/10 focus-visible:border-none focus-visible:bg-transparent"
+                          placeholder="Description"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            debouncedSave({
+                              ...form.getValues(),
+                              description: e.target.value,
+                            });
+                          }}
+                        />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </Form>
+          </CardTitle>
+        </CardHeader>
+      </Card>
+    </PermissionWrapper>
   );
 }
