@@ -49,6 +49,7 @@ export const update = mutation({
     formId: v.id("forms"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
+    authRequired: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     console.log("update", args);
@@ -72,6 +73,7 @@ export const update = mutation({
     await ctx.db.patch(args.formId, {
       name: args.name,
       description: args.description,
+      authRequired: args.authRequired,
     });
   },
 });
@@ -246,7 +248,7 @@ export const checkFormOwnership = query({
   },
   handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
-    
+
     if (!identity?.email) {
       return false;
     }
@@ -261,28 +263,6 @@ export const checkFormOwnership = query({
     }
 
     return form.createdBy === identity.email;
-  },
-});
-
-
-export const updateForm = mutation({
-  args: {
-    formId: v.id("forms"),
-    name: v.optional(v.string()),
-    description: v.optional(v.string()),
-    authRequired: v.optional(v.boolean()),  
-  },
-  handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (identity === null) {
-      throw new Error("Not authenticated");
-    }
-    // may require one here too
-    await ctx.db.patch(args.formId, {
-      name: args.name,
-      description: args.description,
-      authRequired: args.authRequired,
-    });
   },
 });
 
@@ -317,7 +297,7 @@ export const deleteFormWithAllData = mutation({
       .query("field_responses")
       .withIndex("by_formId", (q) => q.eq("formId", args.formId))
       .collect();
-    
+
     for (const fieldResponse of fieldResponses) {
       await ctx.db.delete(fieldResponse._id);
     }
@@ -327,7 +307,7 @@ export const deleteFormWithAllData = mutation({
       .query("form_responses")
       .withIndex("by_formId", (q) => q.eq("formId", args.formId))
       .collect();
-      
+
     for (const formResponse of formResponses) {
       await ctx.db.delete(formResponse._id);
     }
@@ -337,7 +317,7 @@ export const deleteFormWithAllData = mutation({
       .query("form_fields")
       .withIndex("by_formId", (q) => q.eq("formId", args.formId))
       .collect();
-      
+
     for (const field of formFields) {
       await ctx.db.delete(field._id);
     }
@@ -348,3 +328,4 @@ export const deleteFormWithAllData = mutation({
     return null;
   },
 });
+
