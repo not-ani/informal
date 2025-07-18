@@ -2,9 +2,6 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 import { authTables } from "@convex-dev/auth/server";
 
-// The schema is normally optional, but Convex Auth
-// requires indexes defined on `authTables`.
-// The schema provides more precise TypeScript types.
 export default defineSchema({
   ...authTables,
   numbers: defineTable({
@@ -19,16 +16,32 @@ export default defineSchema({
     createdBy: v.string(),
     defaultRequired: v.optional(v.boolean()),
     authRequired: v.optional(v.boolean()),
+    oneTime: v.optional(v.boolean()),
     description: v.optional(v.string()),
     name: v.optional(v.string()),
   }).index("by_createdBy", ["createdBy"]),
+
+  form_collaborators: defineTable({
+    formId: v.id("forms"),
+    userEmail: v.string(),
+    role: v.union(v.literal("owner"), v.literal("editor"), v.literal("viewer")),
+    status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("rejected")),
+    invitedBy: v.string(),
+    invitedAt: v.number(),
+    respondedAt: v.optional(v.number()),
+  })
+    .index("by_formId", ["formId"])
+    .index("by_userEmail", ["userEmail"])
+    .index("by_formId_and_userEmail", ["formId", "userEmail"])
+    .index("by_userEmail_and_status", ["userEmail", "status"]),
 
   form_responses: defineTable({
     formId: v.id("forms"),
     userEmail: v.optional(v.string()),
   })
     .index("by_formId", ["formId"])
-    .index("by_applicantId_and_jobId", ["userEmail", "formId"]),
+    .index("by_applicantId_and_jobId", ["userEmail", "formId"])
+    .index("by_formId_and_userEmail", ["formId", "userEmail"]),
 
   field_responses: defineTable({
     formId: v.id("forms"),
@@ -39,7 +52,9 @@ export default defineSchema({
   })
     .index("by_formId", ["formId"])
     .index("by_fieldId", ["fieldId"])
-    .index("by_formResponseId", ["formResponseId"]),
+    .index("by_formResponseId", ["formResponseId"])
+    .index("by_formId_and_fieldId", ["formId", "fieldId"])
+    .index("by_formId_and_fieldId_and_response", ["formId", "fieldId", "response"]),
   form_fields: defineTable({
     formId: v.string(),
     default: v.optional(v.any()),

@@ -4,17 +4,16 @@ import { Authenticated, Preloaded, useMutation, usePreloadedQuery } from "convex
 import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Send } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Send, Users } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-// Props for the preloaded query coming from the server component
 interface HomeProps {
-  preloaded: Preloaded<typeof api.forms.getUserForms>;
+  preloaded: Preloaded<typeof api.collaborators.getUserAccessibleForms>;
 }
 
 export default function Home({ preloaded }: HomeProps) {
-  // Reactive data fetched on the server and kept up-to-date on the client
   const userForms = usePreloadedQuery(preloaded);
 
   const router = useRouter();
@@ -58,9 +57,7 @@ export default function Home({ preloaded }: HomeProps) {
   return (
     <Authenticated>
       <div className="min-h-screen flex flex-col items-center bg-background">
-        {/* Main Content */}
         <main className="container mx-auto px-4 py-54 ">
-          {/* Form Creation Section */}
           <div className="max-w-3xl mx-auto mb-12">
             <div className="text-center mb-6">
               <h2 className="text-5xl font-bold mb-2">Create a new form with AI</h2>
@@ -89,7 +86,6 @@ export default function Home({ preloaded }: HomeProps) {
             </div>
           </div>
 
-          {/* Recent Projects Section */}
           <div className="max-w-6xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-semibold">Recent Projects</h3>
@@ -100,19 +96,32 @@ export default function Home({ preloaded }: HomeProps) {
               {userForms.length > 0 ? (
                 userForms.slice(0, 5).map((form) => (
                   <div key={form._id} className="flex items-center justify-between py-2">
-                    <div>
-                      <p className="font-medium">{form.name}</p>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-medium">{form.name}</p>
+                        <Badge 
+                          variant={form.userRole === "owner" ? "default" : "secondary"} 
+                          className="text-xs"
+                        >
+                          <Users className="h-3 w-3 mr-1" />
+                          {form.userRole}
+                        </Badge>
+                      </div>
                       <p className="text-sm text-muted-foreground line-clamp-1">
                         {form.description}
                       </p>
                     </div>
-                    <Button size="sm" variant="outline" onClick={() => router.push(`/form/${form._id}/edit`)}>
-                      Open
+                    <Button 
+                      size="sm" 
+                      variant="outline" 
+                      onClick={() => router.push(`/form/${form._id}/${form.userRole === "viewer" ? "" : "edit"}`)}
+                    >
+                      {form.userRole === "viewer" ? "View" : "Open"}
                     </Button>
                   </div>
                 ))
               ) : (
-                <p className="text-muted-foreground">You haven&apos;t created any forms yet.</p>
+                <p className="text-muted-foreground">No forms available. Create a new form or wait for collaboration invites.</p>
               )}
             </div>
           </div>

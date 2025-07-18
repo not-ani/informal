@@ -1,3 +1,4 @@
+import { PermissionWrapper } from "./edit/permission-wrapper";
 import { FormContextProvider } from "./form-context";
 import { Navbar } from "./navbar";
 
@@ -13,11 +14,12 @@ export default async function Layout({
   const id = (await params).id;
   return (
     <FormContextProvider id={id}>
-      <div className="h-screen overflow-hidden">
-
-      <Navbar />
-      {children}
-      </div>
+      <PermissionWrapper formId={id} requiredPermission="view">
+        <div className="h-screen overflow-hidden">
+          <Navbar />
+          {children}
+        </div>
+      </PermissionWrapper>
     </FormContextProvider>
   );
 }
