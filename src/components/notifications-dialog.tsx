@@ -20,7 +20,8 @@ import { Bell, Check, X, Mail, Clock, Users } from "lucide-react";
 export function NotificationsDialog() {
   const [open, setOpen] = useState(false);
 
-  const pendingInvitations = useQuery(api.collaborators.getPendingInvitations);
+  const pendingInvitations = useQuery(api.collaborators.getPendingInvitations, {
+  });
 
   const acceptInvitation = useMutation(api.collaborators.acceptInvitation);
   const rejectInvitation = useMutation(api.collaborators.rejectInvitation);

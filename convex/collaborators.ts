@@ -28,7 +28,7 @@ async function checkFormPermission(
   const collaboration = await ctx.db
     .query("form_collaborators")
     .withIndex("by_formId_and_userEmail", (q) =>
-      q.eq("formId", formId).eq("userEmail", identity.email),
+      q.eq("formId", formId).eq("userEmail", identity.email!),
     )
     .filter((q) => q.eq(q.field("status"), "accepted"))
     .unique();
@@ -276,20 +276,31 @@ export const getFormPermissions = query({
 
 export const getPendingInvitations = query({
   args: {
-    formId: v.id("forms"),
+    formId: v.optional(v.id("forms")),
   },
-  handler: async (ctx) => {
+  handler: async (ctx, args) => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity?.email) {
       return [];
     }
+    let pendingInvitations;
 
-    const pendingInvitations = await ctx.db
-      .query("form_collaborators")
-      .withIndex("by_userEmail_and_status", (q) =>
-        q.eq("userEmail", identity.email).eq("status", "pending"),
-      )
-      .collect();
+    if (args.formId) {
+      pendingInvitations = await ctx.db
+        .query("form_collaborators")
+        .withIndex("by_userEmail_and_status", (q) =>
+          q.eq("userEmail", identity.email!).eq("status", "pending"),
+        )
+        .filter((q) => q.eq(q.field("formId"), args.formId))
+        .collect();
+    } else {
+      pendingInvitations = await ctx.db
+        .query("form_collaborators")
+        .withIndex("by_userEmail_and_status", (q) =>
+          q.eq("userEmail", identity.email!).eq("status", "pending"),
+        )
+        .collect();
+    }
 
     const enrichedInvitations = await Promise.all(
       pendingInvitations.map(async (invitation) => {
@@ -322,7 +333,7 @@ export const getPendingInvitationForForm = query({
     const pendingInvitation = await ctx.db
       .query("form_collaborators")
       .withIndex("by_formId_and_userEmail", (q) =>
-        q.eq("formId", args.formId).eq("userEmail", identity.email),
+        q.eq("formId", args.formId).eq("userEmail", identity.email!),
       )
       .filter((q) => q.eq(q.field("status"), "pending"))
       .unique();
@@ -353,12 +364,12 @@ export const getUserAccessibleForms = query({
 
     const ownedForms = await ctx.db
       .query("forms")
-      .withIndex("by_createdBy", (q) => q.eq("createdBy", identity.email))
+      .withIndex("by_createdBy", (q) => q.eq("createdBy", identity.email!))
       .collect();
     const collaborations = await ctx.db
       .query("form_collaborators")
       .withIndex("by_userEmail_and_status", (q) =>
-        q.eq("userEmail", identity.email).eq("status", "accepted"),
+        q.eq("userEmail", identity.email!).eq("status", "accepted"),
       )
       .collect();
     const collaboratedForms = await Promise.all(
