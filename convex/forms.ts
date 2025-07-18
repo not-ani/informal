@@ -154,7 +154,7 @@ export const submitResponse = mutation({
     if (userEmail && !form.oneTime) {
       const existingApplication = await ctx.db
         .query("form_responses")
-        .withIndex("by_applicantId_and_jobId", (q) =>
+        .withIndex("by_userEmail_and_formId", (q) =>
           q.eq("userEmail", userEmail).eq("formId", args.formId),
         )
         .first();

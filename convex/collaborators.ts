@@ -358,7 +358,7 @@ export const getUserAccessibleForms = query({
     const collaborations = await ctx.db
       .query("form_collaborators")
       .withIndex("by_userEmail_and_status", (q) =>
-        q.eq("userEmail", identity.email!).eq("status", "accepted"),
+        q.eq("userEmail", identity.email).eq("status", "accepted"),
       )
       .collect();
     const collaboratedForms = await Promise.all(
