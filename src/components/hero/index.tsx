@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Integrations } from "./integrations";
 import { AIChatDemo } from "./ai-chat-demo";
 import { FieldCardsDemo } from "./field-cards-demo";
+import Link from "next/link";
 
 export const Hero = () => {
   // Feature cards data
@@ -69,15 +70,19 @@ export const Hero = () => {
             </p>
 
             <div className="flex gap-5 mt-10">
-              <Button className="h-10 w-[158px] bg-[#8c5cff] rounded-[31px] border border-solid border-black text-white hover:bg-[#7a4de0]">
-                Get Started
+              <Button
+                className="h-10 w-[158px] bg-[#8c5cff] rounded-[31px] border border-solid border-black text-white hover:bg-[#7a4de0]"
+                asChild
+              >
+                <Link href="/sign-in">Get Started</Link>
               </Button>
 
               <Button
                 variant="outline"
                 className="h-10 w-[158px] rounded-[31px] border border-solid border-white text-white hover:bg-[#19191c]"
+                asChild
               >
-                Learn More
+                <Link href="/">Learn More</Link>
               </Button>
             </div>
           </div>
