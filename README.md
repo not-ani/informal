@@ -1,4 +1,4 @@
-NOTE: Project is down temporarily due to my vercel account hitting the free tier limit 
+NOTE: Project is down temporarily due to my vercel account hitting the free tier limit a major update to the app is coming soon
 
 # Informal
 
