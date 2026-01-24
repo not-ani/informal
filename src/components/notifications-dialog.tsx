@@ -20,24 +20,23 @@ import { Bell, Check, X, Mail, Clock, Users } from "lucide-react";
 export function NotificationsDialog() {
   const [open, setOpen] = useState(false);
 
-  const pendingInvitations = useQuery(api.collaborators.getPendingInvitations, {
-  });
+  const pendingInvitations = useQuery(api.collaborators.getPendingInvitations);
 
   const acceptInvitation = useMutation(api.collaborators.acceptInvitation);
   const rejectInvitation = useMutation(api.collaborators.rejectInvitation);
 
-  const handleAccept = async (invitationId: Id<"form_collaborators">) => {
+  const handleAccept = async (invitationId: Id<"invitations">) => {
     try {
-      await acceptInvitation({ collaborationId: invitationId });
+      await acceptInvitation({ invitationId: invitationId });
       toast.success("Invitation accepted successfully!");
     } catch (error: unknown) {
       toast.error((error as Error).message || "Failed to accept invitation");
     }
   };
 
-  const handleReject = async (invitationId: Id<"form_collaborators">) => {
+  const handleReject = async (invitationId: Id<"invitations">) => {
     try {
-      await rejectInvitation({ collaborationId: invitationId });
+      await rejectInvitation({ invitationId: invitationId });
       toast.success("Invitation declined successfully!");
     } catch (error: unknown) {
       toast.error((error as Error).message || "Failed to decline invitation");

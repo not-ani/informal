@@ -1,6 +1,7 @@
+import { FormProvider } from "@/components/forms/context";
 import { PermissionWrapper } from "./edit/permission-wrapper";
-import { FormContextProvider } from "./form-context";
 import { Navbar } from "./navbar";
+import type { Id } from "@convex/_generated/dataModel";
 
 export default async function Layout({
   children,
@@ -13,13 +14,13 @@ export default async function Layout({
 }) {
   const id = (await params).id;
   return (
-    <FormContextProvider id={id}>
+    <FormProvider formId={id as Id<"forms">}>
       <PermissionWrapper formId={id} requiredPermission="view">
         <div className="h-screen overflow-hidden">
           <Navbar />
           {children}
         </div>
       </PermissionWrapper>
-    </FormContextProvider>
+    </FormProvider>
   );
 }

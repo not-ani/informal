@@ -12,7 +12,7 @@ export const getFormInfoTool = (token: string) => tool({
   execute: async ({ formId }) => {
     const form = formId as Id<"forms">;
     const formInfo = await fetchQuery(
-      api.forms.getFormContext,
+      api.forms.get,
       {
         formId: form,
       },

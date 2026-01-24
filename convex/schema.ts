@@ -1,85 +1,144 @@
+import { authTables } from "@convex-dev/auth/server";
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
-import { authTables } from "@convex-dev/auth/server";
 
 export default defineSchema({
-  ...authTables,
-  numbers: defineTable({
-    value: v.number(),
-  }),
+	...authTables,
+	numbers: defineTable({
+		value: v.number(),
+	}),
 
-  waitlist: defineTable({
-    email: v.string(),
-  }),
+	waitlist: defineTable({
+		email: v.string(),
+	}),
 
-  forms: defineTable({
-    createdBy: v.string(),
-    defaultRequired: v.optional(v.boolean()),
-    authRequired: v.optional(v.boolean()),
-    oneTime: v.optional(v.boolean()),
-    description: v.optional(v.string()),
-    name: v.optional(v.string()),
-  }).index("by_createdBy", ["createdBy"]),
+	collaborators: defineTable({
+		formId: v.id("forms"),
+		userId: v.string(),
+		role: v.union(v.literal("owner"), v.literal("editor"), v.literal("viewer")),
+	})
+    .index("by_form", ["formId"])
+    .index("by_user", ["userId"])
+		.index("by_form_by_user", ["formId", "userId"]),
 
-  form_collaborators: defineTable({
+  invitations: defineTable({
     formId: v.id("forms"),
-    userEmail: v.string(),
+    userId: v.string(),
+    invitedBy: v.string(),
     role: v.union(v.literal("owner"), v.literal("editor"), v.literal("viewer")),
     status: v.union(v.literal("pending"), v.literal("accepted"), v.literal("rejected")),
-    invitedBy: v.string(),
-    invitedAt: v.number(),
-    respondedAt: v.optional(v.number()),
   })
-    .index("by_formId", ["formId"])
-    .index("by_userEmail", ["userEmail"])
-    .index("by_formId_and_userEmail", ["formId", "userEmail"])
-    .index("by_userEmail_and_status", ["userEmail", "status"]),
+    .index("by_form", ["formId"])
+	.index("by_user", ["userId"])
+    .index("by_form_by_user", ["formId", "userId"])
+    .index("by_form_by_status", ["formId", "status"]),
 
-  form_responses: defineTable({
-    formId: v.id("forms"),
-    userEmail: v.optional(v.string()),
-  })
-    .index("by_formId", ["formId"])
-    .index("by_userEmail_and_formId", ["userEmail", "formId"])
-    .index("by_formId_and_userEmail", ["formId", "userEmail"]),
+	forms: defineTable({
+		title: v.string(),
+		description: v.optional(v.string()),
+		isPublished: v.boolean(),
+		createdBy: v.string(),
+	})
+		.index("by_published", ["isPublished"])
+		.index("by_createdBy", ["createdBy"]),
 
-  field_responses: defineTable({
-    formId: v.id("forms"),
-    fieldId: v.id("form_fields"),
-    userEmail: v.optional(v.string()),
-    formResponseId: v.id("form_responses"),
-    response: v.union(v.string(), v.array(v.string())),
-  })
-    .index("by_formId", ["formId"])
-    .index("by_fieldId", ["fieldId"])
-    .index("by_formResponseId", ["formResponseId"])
-    .index("by_formId_and_fieldId", ["formId", "fieldId"])
-    .index("by_formId_and_fieldId_and_response", ["formId", "fieldId", "response"]),
-  form_fields: defineTable({
-    formId: v.string(),
-    default: v.optional(v.any()),
-    name: v.string(),
-    order: v.float64(),
-    required: v.optional(v.boolean()),
-    selectOptions: v.optional(
-      v.array(
-        v.object({
-          name: v.string(),
-          order: v.float64(),
-        }),
-      ),
-    ),
+	formSections: defineTable({
+		formId: v.id("forms"),
+		title: v.string(),
+		description: v.optional(v.string()),
+		order: v.number(),
+		condition: v.optional(
+			v.object({
+				sourceFieldId: v.id("formFields"),
+				operator: v.union(
+					v.literal("equals"),
+					v.literal("notEquals"),
+					v.literal("contains"),
+				),
+				value: v.union(v.string(), v.array(v.string())),
+			}),
+		),
+	})
+		.index("by_form", ["formId"])
+		.index("by_form_and_order", ["formId", "order"]),
 
-    type: v.union(
-      v.literal("text"),
-      v.literal("textarea"),
-      v.literal("select"),
-      v.literal("number"),
-      v.literal("date"),
-      v.literal("time"),
-      v.literal("MCQ"),
-      v.literal("checkbox"),
-      v.literal("file"),
-    ),
-  }).index("by_formId", ["formId"]),
+	formFields: defineTable({
+		formId: v.id("forms"),
+		sectionId: v.optional(v.id("formSections")),
+		label: v.string(),
+		description: v.optional(v.string()),
+		type: v.union(
+			v.literal("text"),
+			v.literal("textarea"),
+			v.literal("number"),
+			v.literal("select"),
+			v.literal("multiselect"),
+			v.literal("file"),
+		),
+		required: v.boolean(),
+		order: v.number(),
+		options: v.optional(v.array(v.string())),
+		min: v.optional(v.number()),
+		max: v.optional(v.number()),
+		fileConfig: v.optional(
+			v.object({
+				maxSizeBytes: v.number(),
+				allowedMimeTypes: v.array(v.string()),
+				maxFiles: v.optional(v.number()),
+			}),
+		),
+		condition: v.optional(
+			v.object({
+				sourceFieldId: v.id("formFields"),
+				operator: v.union(
+					v.literal("equals"),
+					v.literal("notEquals"),
+					v.literal("contains"),
+				),
+				value: v.union(v.string(), v.array(v.string())),
+			}),
+		),
+	})
+		.index("by_form", ["formId"])
+		.index("by_form_and_order", ["formId", "order"])
+		.index("by_section", ["sectionId"]),
+
+	responses: defineTable({
+		formId: v.id("forms"),
+		submittedAt: v.number(),
+		applicantEmail: v.string(),
+		applicantName: v.string(),
+		status: v.union(
+			v.literal("pending"),
+			v.literal("reviewed"),
+			v.literal("accepted"),
+			v.literal("rejected"),
+		),
+	})
+		.index("by_form", ["formId"])
+		.index("by_form_and_status", ["formId", "status"])
+		.index("by_email", ["applicantEmail"]),
+
+	fieldResponses: defineTable({
+		responseId: v.id("responses"),
+		fieldId: v.id("formFields"),
+		value: v.union(
+			v.string(),
+			v.array(v.string()),
+			v.object({
+				type: v.literal("file"),
+				files: v.array(
+					v.object({
+						blobId: v.string(),
+						path: v.string(),
+						filename: v.string(),
+						contentType: v.string(),
+						sizeBytes: v.number(),
+					}),
+				),
+			}),
+		),
+	})
+		.index("by_response", ["responseId"])
+		.index("by_fieldId", ["fieldId"]),
 });

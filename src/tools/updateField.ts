@@ -2,7 +2,7 @@ import { tool } from "ai";
 import { fetchMutation } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { FieldType, fieldTypeSchema } from "@/lib/utils";
+import { fieldTypeSchema } from "@/lib/utils";
 import z from "zod";
 
 export const updateFieldTool = (token: string) => tool({
@@ -30,23 +30,18 @@ export const updateFieldTool = (token: string) => tool({
     formId,
     name,
     type,
-    order,
     required,
-    selectOptions,
   }) => {
-    const fId = fieldId as Id<"form_fields">;
+    const fId = fieldId as Id<"formFields">;
     const form = formId as Id<"forms">;
-    const t = type as FieldType;
     await fetchMutation(
-      api.form_fields.updateField,
+      api.fields.update,
       {
         formId: form,
         fieldId: fId,
-        name,
-        type: t,
-        order,
+        label: name,
+        type: type as "text" | "textarea" | "number" | "select" | "multiselect" | "file",
         required,
-        selectOptions,
       },
       {
         token,

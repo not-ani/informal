@@ -12,7 +12,7 @@ export const deleteFormTool = (token: string) => tool({
   execute: async ({ formId }) => {
     const form = formId as Id<"forms">;
     await fetchMutation(
-      api.forms.deleteForm,
+      api.forms.remove,
       {
         formId: form,
       },

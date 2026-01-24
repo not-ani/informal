@@ -1,37 +1,32 @@
 "use client";
-import React from "react";
-import { Form } from "./form";
-import {
-  ResizablePanel,
-  ResizablePanelGroup,
-  ResizableHandle,
-} from "@/components/ui/resizable";
-import { useParams } from "next/navigation";
+import { useForm } from "@/components/forms/context";
+import { FormBuilder } from "@/components/forms/editor/builder/form-builder";
+import { FormHeader } from "@/components/forms/editor/builder/form-header";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
 import { Chat } from "./_chat";
-
 export default function Page() {
-  const { id } = useParams<{ id: string }>();
+	const form = useForm();
+	const fields = useQuery(api.fields.listByForm, { formId: form._id });
+	const sections = useQuery(api.sections.listByFormId, {
+		formId: form._id,
+	});
 
-  return (
-    <main className="h-screen overflow-hidden">
-      <ResizablePanelGroup direction="horizontal">
-        <ResizablePanel
-          defaultSize={60}
-          minSize={30}
-          maxSize={75}
-          className="bg-background flex flex-col gap-10 pt-10 items-center lg:min-w-2/3 h-screen overflow-y-scroll scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent "
-        >
-          <div className="overflow-y-scroll w-full items-center flex flex-col gap-10 pt-10">
-            <Form id={id} />
-          </div>
-        </ResizablePanel>
-        <ResizableHandle />
-        <ResizablePanel className="overflow-y-scroll w-full h-full items-center flex flex-col gap-10 pt-10">
-          <div className="overflow-y-scroll w-full h-full items-center flex flex-col gap-10 pt-10">
-            <Chat id={id} />
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
-    </main>
-  );
+	return (
+		<main className="h-screen w-full overflow-hidden">
+			<div className="flex h-full w-full">
+				<div className="h-full w-full flex flex-col md:w-3/4 items-center gap-10 pt-10 overflow-y-scroll p-10">
+					<FormHeader form={form} formId={form._id} />
+					<FormBuilder
+						fields={fields ?? []}
+						formId={form._id}
+						sections={sections ?? []}
+					/>
+				</div>
+				<div className="h-full w-0 md:w-1/4 border-l border-border flex flex-col items-center gap-10 pt-10 overflow-y-scroll">
+					<Chat id={form._id} />
+				</div>
+			</div>
+		</main>
+	);
 }

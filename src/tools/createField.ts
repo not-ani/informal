@@ -3,14 +3,14 @@ import { fetchMutation } from "convex/nextjs";
 import { api } from "@convex/_generated/api";
 import { fieldTypeSchema } from "@/lib/utils";
 import z from "zod";
+import { Id } from "@convex/_generated/dataModel";
 
 export const createFieldTool = (token: string) => tool({
   description: "Create a new field for a form",
   parameters: z.object({
     formId: z.string(),
-    name: z.string(),
+    label: z.string(),
     type: fieldTypeSchema,
-    order: z.number(),
     required: z.boolean(),
     selectOptions: z.optional(
       z.array(
@@ -23,21 +23,19 @@ export const createFieldTool = (token: string) => tool({
   }),
   execute: async ({
     formId,
-    name,
+    label,
     type,
-    order,
     required,
     selectOptions,
   }) => {
     await fetchMutation(
-      api.form_fields.addField,
+      api.fields.create,
       {
-        formId,
-        name,
-        type,
-        order,
+        formId: formId as Id<"forms">,
+        label: label,
+        type: type as "text" | "textarea" | "number" | "select" | "multiselect" | "file",
         required,
-        selectOptions,
+        options: selectOptions?.map((option) => option.name),
       },
       {
         token,

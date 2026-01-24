@@ -1,8 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -42,7 +43,7 @@ export function PermissionWrapper({
     
     setIsAccepting(true);
     try {
-      await acceptInvitation({ collaborationId: pendingInvitation._id });
+      await acceptInvitation({ invitationId: pendingInvitation._id });
       toast.success("Invitation accepted! You now have access to this form.");
     } catch (error: unknown) {
       toast.error((error as Error).message || "Failed to accept invitation");
@@ -56,7 +57,7 @@ export function PermissionWrapper({
     if (!pendingInvitation) return;
     
     try {
-      await rejectInvitation({ collaborationId: pendingInvitation._id });
+      await rejectInvitation({ invitationId: pendingInvitation._id });
       toast.success("Invitation declined.");
     } catch (error: unknown) {
       toast.error((error as Error).message || "Failed to decline invitation");

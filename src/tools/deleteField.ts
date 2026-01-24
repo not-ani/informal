@@ -8,13 +8,16 @@ export const deleteFieldTool = (token: string) => tool({
   description: "Delete an existing field for a form",
   parameters: z.object({
     fieldId: z.string(),
+    formId: z.string(),
   }),
-  execute: async ({ fieldId }) => {
-    const fId = fieldId as Id<"form_fields">;
+  execute: async ({ fieldId, formId }) => {
+    const fId = fieldId as Id<"formFields">;
+    const form = formId as Id<"forms">;
     await fetchMutation(
-      api.form_fields.deleteField,
+      api.fields.remove,
       {
         fieldId: fId,
+        formId: form,
       },
       {
         token,

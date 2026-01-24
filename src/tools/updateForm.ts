@@ -9,19 +9,17 @@ export const updateForm = (token: string) =>
     description: "Update an existing form",
     parameters: z.object({
       formId: z.string(),
-      name: z.string().optional(),
+      title: z.string().optional(),
       description: z.string().optional(),
-      authRequired: z.boolean().optional(),
     }),
-    execute: async ({ formId, name, description, authRequired }) => {
+    execute: async ({ formId, title, description }) => {
       const form = formId as Id<"forms">;
       await fetchMutation(
         api.forms.update,
         {
           formId: form,
-          name,
+          title,
           description,
-          authRequired,
         },
         { token },
       );
