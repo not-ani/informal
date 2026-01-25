@@ -1,3 +1,4 @@
+# NOTE: Project is temporarily down because I ran out of my free credits on vercel, will be back online soon 
 # Informal
 
 An Open-Source Informal Alternative for the Future of Email
